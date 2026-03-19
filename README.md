@@ -1,4 +1,4 @@
-# Chat Node App
+# Chat Next App
 
 ## Visão Geral
 
