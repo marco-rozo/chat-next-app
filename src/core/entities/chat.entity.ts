@@ -43,3 +43,8 @@ export interface INewMessageNotification {
     senderName: string;
     senderId: string;
 }
+
+export interface INewChatNotification {
+    chat: IUserChat;
+    createdBy: string;
+}

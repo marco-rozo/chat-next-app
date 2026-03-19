@@ -6,7 +6,7 @@ import { toast, Zoom } from "react-toastify";
 import { backendClient } from "@/src/core/config/backend.client";
 import { getToken, getUser, removeToken, removeUser } from "@/src/core/utils/auth.util";
 import { FindUserResponse } from "@/src/core/entities/user.entity";
-import { IUserChat, UserChatsResponse, CreateChatResponse, INewMessageNotification } from "@/src/core/entities/chat.entity";
+import { IUserChat, UserChatsResponse, CreateChatResponse, INewMessageNotification, INewChatNotification } from "@/src/core/entities/chat.entity";
 import { isFailure } from "@/src/core/entities/base.entity";
 import { ChatEventsEnum } from "@/src/core/enums/chatEvents.enum";
 import { UserStatusEnum } from "@/src/core/enums/userStatus.enum";
@@ -115,10 +115,34 @@ export default function ChatsPage() {
             );
         });
 
+        socket.on(ChatEventsEnum.CHAT_CREATED, (notification: INewChatNotification) => {
+            const currentUserId = getUser()?.id;
+            if (notification.createdBy !== currentUserId) {
+                setUserChats((prevChats) => {
+                    const chatExists = prevChats.some(chat => chat._id === notification.chat._id);
+                    if (chatExists) {
+                        return prevChats;
+                    }
+                    const chatWithStatus = {
+                        ...notification.chat,
+                        contactStatus: UserStatusEnum.ONLINE // se foi notificado quer dizer que o usuario acabou de criar, então deve estar online.
+                    };
+                    return [chatWithStatus, ...prevChats];
+                });
+
+                toast.info("Você foi adicionado a um novo chat!", {
+                    position: "top-right",
+                    hideProgressBar: true,
+                    autoClose: 3000,
+                });
+            }
+        });
+
         return () => {
             socket.offAny();
             socket.off(ChatEventsEnum.USER_STATUS_CHANGED);
             socket.off(ChatEventsEnum.NEW_MESSAGE_NOTIFICATION);
+            socket.off(ChatEventsEnum.CHAT_CREATED);
         };
     }, [socket]);
 
