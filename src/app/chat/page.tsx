@@ -114,7 +114,9 @@ export default function ChatPage() {
         socket.emit(ChatEventsEnum.JOIN_ROOM, { room: roomId, user: user?.name || "Usuário" });
 
         const messageHandler = (data: IMessage) => {
-            // nao adiciona se for mensagem do proprio usuario (ja foi adicionada localmente via )
+            if (data.chat !== roomId) {
+                return;
+            }
             if (data.sender === user?.id) {
                 return;
             }
