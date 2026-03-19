@@ -1,8 +1,15 @@
-import { AUTH_HEADER, BEARER } from "../consts/auth.consts";
+import { AUTH_HEADER, BEARER, INVALID_TOKEN_ERROR_CODE } from "../consts/auth.consts";
 import { isFailure } from "../entities/base.entity";
 import { getToken } from "../utils/auth.util";
+import { authEvents } from "../events/auth.events";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export class InvalidTokenError extends Error {
+  constructor(message: string = "Token inválido") {
+    super(message);
+    this.name = "InvalidTokenError";
+  }
+}
 
 export class BackendClient {
   private readonly baseUrl: string;
@@ -75,6 +82,12 @@ export class BackendClient {
       }
 
       console.log(JSON.stringify(errorData));
+
+      if (errorData?.data?.errorCode === INVALID_TOKEN_ERROR_CODE) {
+        const message = errorData.data.message || "Sessão expirada";
+        authEvents.emit(INVALID_TOKEN_ERROR_CODE, errorData.data.message);
+        throw new InvalidTokenError(message);
+      }
 
       let errorMessage = `Erro HTTP: ${response.status}`;
 

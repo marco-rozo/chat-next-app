@@ -1,9 +1,11 @@
-import { TOKEN_KEY, USER_KEY } from "../consts/auth.consts";
+import { TOKEN_KEY, USER_KEY, LOGOUT_IN_PROGRESS_KEY } from "../consts/auth.consts";
 import { UserEntity } from "../entities/user.entity";
+import { socketService } from "./socket.service";
 
 export const setToken = (token: string): void => {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.removeItem(LOGOUT_IN_PROGRESS_KEY);
   }
 };
 
@@ -44,4 +46,14 @@ export const removeUser = (): void => {
   if (typeof window !== "undefined") {
     localStorage.removeItem(USER_KEY);
   }
+};
+
+export const logout = (): void => {
+  if (typeof window === "undefined") return;
+
+  socketService.disconnect();
+  removeToken();
+  removeUser();
+  sessionStorage.removeItem(LOGOUT_IN_PROGRESS_KEY);
+  window.location.href = "/login";
 };
