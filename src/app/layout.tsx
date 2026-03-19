@@ -10,8 +10,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Chat IXC",
-  description: "Chat IXC",
+  title: "Chat Next App",
+  description: "Chat Next App",
 };
 
 import { ToastContainer } from "react-toastify";
