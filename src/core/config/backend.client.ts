@@ -81,8 +81,6 @@ export class BackendClient {
         throw new Error(`Erro HTTP: ${response.status} ${response.statusText}`);
       }
 
-      console.log(JSON.stringify(errorData));
-
       if (errorData?.data?.errorCode === INVALID_TOKEN_ERROR_CODE) {
         const message = errorData.data.message || "Sessão expirada";
         authEvents.emit(INVALID_TOKEN_ERROR_CODE, errorData.data.message);
